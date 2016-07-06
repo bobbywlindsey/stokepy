@@ -14,9 +14,15 @@ import stokepy as sp
 import numpy as np
 
 # create nxn transition matrix
-P = np.array([[0, .5, 0, .5, 0, 0, 0, 0, 0], [1/3, 0, 1/3, 0, 1/3, 0, 0, 0, 0], [0, .5, 0, 0, 0, .5, 0, 0, 0], \
-              [1/3, 0, 0, 0, 1/3, 0, 1/3, 0, 0], [0, 1/4, 0, 1/4, 0, 1/4, 0, 1/4, 0], [0, 0, 1/3, 0, 1/3, 0, 0, 0, 1/3], \
-              [0, 0, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 1/3, 0, 1/3, 0, 1/3], [0, 0, 0, 0, 0, 0, 0, 0, 1]])
+P = np.array([[0, .5, 0, .5, 0, 0, 0, 0, 0], \
+              [1/3, 0, 1/3, 0, 1/3, 0, 0, 0, 0], \
+              [0, .5, 0, 0, 0, .5, 0, 0, 0], \
+              [1/3, 0, 0, 0, 1/3, 0, 1/3, 0, 0], \
+              [0, 1/4, 0, 1/4, 0, 1/4, 0, 1/4, 0], \
+              [0, 0, 1/3, 0, 1/3, 0, 0, 0, 1/3], \
+              [0, 0, 0, 0, 0, 0, 1, 0, 0], \
+              [0, 0, 0, 0, 1/3, 0, 1/3, 0, 1/3], \
+              [0, 0, 0, 0, 0, 0, 0, 0, 1]])
 
 # create initial distribution vector
 phi = np.array([0, 0, 0, 0, 0, 1, 0, 0, 0])
@@ -31,14 +37,11 @@ sample_evolution = sp.SampleEvolution(markov_chain, samples, steps, states_in_re
 sample_evolution.run()
 
 # get data from the run
-average_distribution = sample_evolution.pi
-# empirical probability distribution function
-epdf = sample_evolution.epdf
-
+average_distribution   = sample_evolution.pi
+epdf                   = sample_evolution.epdf
 absorption_proportions = sample_evolution.absorption_proportions
-# absorbed proportions by recurrent class
-apbrc = sample_evolution.absorbed_proportions_by_recurrent_class
-mean_absorption_time = sample_evolution.mean_absorption_time
+apbrc                  = sample_evolution.recurrent_class_absorbed_proportions
+mean_absorption_time   = sample_evolution.mean_absorption_time
 
 # plot absorption times for recurrent classes
 sample_evolution.plot_absorption()
