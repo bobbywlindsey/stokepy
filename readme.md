@@ -1,6 +1,6 @@
 # stokepy
 
-Explore your stochastic models through various methods of simulation and
+Explore stochastic models through various methods of simulation and
 mathematical theory.
 
 ## Install
@@ -12,9 +12,13 @@ $ pip install [something here]
 ```python
 import stokepy as sp
 import numpy as np
+```
+### Ways to Generate a Markov chain
 
-# create nxn transition matrix
-P = np.array([[0, .5, 0, .5, 0, 0, 0, 0, 0], \
+Manually:
+```python
+# create nxn Markov chain
+mc = np.array([[0, .5, 0, .5, 0, 0, 0, 0, 0], \
               [1/3, 0, 1/3, 0, 1/3, 0, 0, 0, 0], \
               [0, .5, 0, 0, 0, .5, 0, 0, 0], \
               [1/3, 0, 0, 0, 1/3, 0, 1/3, 0, 0], \
@@ -23,15 +27,30 @@ P = np.array([[0, .5, 0, .5, 0, 0, 0, 0, 0], \
               [0, 0, 0, 0, 0, 0, 1, 0, 0], \
               [0, 0, 0, 0, 1/3, 0, 1/3, 0, 1/3], \
               [0, 0, 0, 0, 0, 0, 0, 0, 1]])
+```
+By Parameters:
+```python
+# instantiate class
+mc = sp.MarkovChain()
 
+# generate Markov chain with no boundary conditions
+mc.gen_from_params(p = 0.6, num_of_states = 5, dim = 2)
+
+# apply boundary condition: absorbing, reflecting, semi-reflecting
+# only works for 1 dimension Markov chains at the moment
+mc.apply_boundary_condition(condition='semi-reflecting')
+```
+
+### Ways to Run the Markov chain
+
+Evolution via Samples
+```python
 # create initial distribution vector
 phi = np.array([0, 0, 0, 0, 0, 1, 0, 0, 0])
 
-# create Markov chain object
-markov_chain = sp.MarkovChain(P, phi)
-
 # choose solution method like Sample Evolution
-sample_evolution = sp.SampleEvolution(markov_chain, samples, steps, states_in_recurrent_classes)
+sample_evolution = sp.SampleEvolution(mc, phi, samples, steps,\
+                                      states_in_recurrent_classes)
 
 # run the solution
 sample_evolution.run()
