@@ -1,9 +1,11 @@
 from .headers import *
 
 def architecture_check_passed(P, phi):
-    """ Make sure columns of the transition matrix, P, (which represent the
+    """
+    Make sure columns of the transition matrix, P, (which represent the
     number of states) match the number of elements in the initial distribution,
-    phi, which represents the starting point in each state """
+    phi, which represents the starting point in each state
+    """
     num_of_states = P.shape[0]
     if phi.shape[0] != num_of_states:
         #print("Transition matrix and initial distribution dimensions don't match")

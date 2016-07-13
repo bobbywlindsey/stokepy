@@ -1,38 +1,41 @@
 from .headers import *
+from .helpers import *
 
 class MarkovChain:
     """
-    Creates Markov Chain object
+    parameters:
+        P   = transition matrix
+        phi = initial distribution
 
-    *TODO
-    - add function to apply boundary conditions
-    - add function to auto-generate P
+    returns a MarkovChain object
     """
 
     def __init__(self):
-        """
-        P = transition matrix
-        phi = initial distribution
-        """
-
         self.P             = None
         self.p             = None
         self.q             = None
         self.num_of_states = None
         self.dim           = None
+        self.phi           = None
 
-    def gen_from_params(self, p, num_of_states, dim):
+    def gen_from_params(self, phi, p, num_of_states, dim):
         """
-        p = probability of moving forward to another state
-        dim = dimension of the Markov chain
+        parameters:
+            p (int)             = probability of moving forward to another state
+            num_of_states (int) = # of states you have
+            dim (int)           = dimension of the Markov chain
+            phi (numpy array)   = initial distribution
 
-        returns transition matrix, P
+        returns P (the Markov chain)
         """
+
         q                  = 1 - p
         self.p             = p
         self.q             = q
         self.num_of_states = num_of_states
         self.dim           = dim
+        self.phi           = phi
+
         if dim == 1:
             P = np.zeros([num_of_states, num_of_states])
             for row in range(num_of_states):
@@ -46,7 +49,14 @@ class MarkovChain:
             raise ValueError('Not yet support for {} dimensions'.format(self.dim))
 
     def apply_boundary_condition(self, condition):
-        if dim == 1:
+        """
+        parameters:
+            condition (str): absorbing, reflecting, semi-reflecting
+
+        applies boundary conditions to Markov chain
+        """
+
+        if self.dim == 1:
             if condition == 'absorbing':
                 # create beginning boundary
                 beg_boundary     = np.zeros(self.num_of_states)
@@ -83,3 +93,6 @@ class MarkovChain:
                 raise ValueError('{} is not a supported condition'.format(condition))
         else:
             raise ValueError('Not yet support for {} dimensions'.format(self.dim))
+
+        if not architecture_check_passed(self.P, self.phi):
+            raise ValueError("P and phi dimensions don't match")

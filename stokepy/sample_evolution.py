@@ -3,18 +3,26 @@ from .helpers import *
 
 class SampleEvolution:
 
-    def __init__(self, markov_chain, samples, steps, rec_class_states, \
+    def __init__(self, markov_chain, phi, samples, steps, rec_class_states, \
                  memory = 10, tolerance = 0.001):
         """
-        markov_chain is a MarkovChain object
+        parameters:
+            markov_chain = MarkovChain object
+            samples (int) = number of samples
+            steps (int) = number of steps
+            rec_class_states (array) = recurrent classes in chain
+            memory (int) = # of steps you want to remember in simulation
+            tolerance (float)
 
         memory and tolerance are optional parameters
+        
+        returns SampleEvolution object with metadata
         """
         self.P                           = markov_chain.P
-        self.phi                         = markov_chain.phi
+        self.phi                         = phi
         self.num_of_steps                = steps
         self.memory                      = memory
-        self.num_of_states               = markov_chain.phi.shape[0]
+        self.num_of_states               = phi.shape[0]
         self.num_of_samples              = samples
         self.states_in_recurrent_classes = rec_class_states
         self.tolerance                   = tolerance

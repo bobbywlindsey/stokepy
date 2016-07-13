@@ -27,14 +27,20 @@ mc = np.array([[0, .5, 0, .5, 0, 0, 0, 0, 0], \
               [0, 0, 0, 0, 0, 0, 1, 0, 0], \
               [0, 0, 0, 0, 1/3, 0, 1/3, 0, 1/3], \
               [0, 0, 0, 0, 0, 0, 0, 0, 1]])
+
+# create initial distribution vector
+phi = np.array([0, 0, 0, 0, 0, 1, 0, 0, 0])
 ```
 By Parameters:
 ```python
 # instantiate class
 mc = sp.MarkovChain()
 
+# create initial distribution vector
+phi = np.array([0, 0, 1, 0, 0])
+
 # generate Markov chain with no boundary conditions
-mc.gen_from_params(p = 0.6, num_of_states = 5, dim = 2)
+mc.gen_from_params(phi, p = 0.6, num_of_states = 5, dim = 2)
 
 # apply boundary condition: absorbing, reflecting, semi-reflecting
 # only works for 1 dimension Markov chains at the moment
@@ -45,12 +51,10 @@ mc.apply_boundary_condition(condition='semi-reflecting')
 
 Evolution via Samples
 ```python
-# create initial distribution vector
-phi = np.array([0, 0, 0, 0, 0, 1, 0, 0, 0])
 
 # choose solution method like Sample Evolution
-sample_evolution = sp.SampleEvolution(mc, phi, samples, steps,\
-                                      states_in_recurrent_classes)
+sample_evolution = sp.SampleEvolution(mc, phi, samples = 2000, steps = 2000,\
+                                      rec_class_states = [])
 
 # run the solution
 sample_evolution.run()
