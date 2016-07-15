@@ -8,6 +8,7 @@ class SampleEvolution:
         """
         parameters:
             markov_chain = MarkovChain object
+            phi (numpy array) = initial distribution vector
             samples (int) = number of samples
             steps (int) = number of steps
             rec_class_states (array) = recurrent classes in chain
@@ -15,7 +16,7 @@ class SampleEvolution:
             tolerance (float)
 
         memory and tolerance are optional parameters
-        
+
         returns SampleEvolution object with metadata
         """
         self.P                           = markov_chain.P
@@ -34,7 +35,6 @@ class SampleEvolution:
         # absorption proportions for plotting
         self.absorption_proportions = None
 
-
         self.recurrent_class_absorbed_proportions = None
         self.mean_absorption_time = None
 
@@ -42,9 +42,7 @@ class SampleEvolution:
         plot_absorption_helper(self.absorption_proportions, self.tolerance)
 
     def run(self):
-        """
-        Evolves the system by simulating many sample paths
-        """
+        """ Evolves the system by simulating many sample paths """
         ### -------------- set stage for simulation -------------- ###
         # create empirical probability distribution function
         epdf    = np.zeros([self.memory, self.num_of_states], dtype = float)
