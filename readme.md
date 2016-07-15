@@ -44,6 +44,7 @@ mc.gen_from_params(phi, p = 0.6, num_of_states = 5, dim = 2)
 mc.apply_boundary_condition(condition='semi-reflecting')
 
 # create initial distribution vector
+phi = np.array([0, 0, 1, 0, 0])
 ```
 
 ### Ways to Run the Markov chain
