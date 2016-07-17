@@ -18,6 +18,9 @@ class Metropolis:
         chosen_neighbor = neighbors[self.pick_neighbor()]
         print(chosen_neighbor)
 
+    def plausibility(self):
+        # TODO: generate Markov chain from data
+        pass
 
     def generate_neighbors(self):
         neighbors = []
@@ -41,7 +44,6 @@ class Metropolis:
             random_probability = random_probability - self.J_unif_prob
             if random_probability < 0:
                 chosen_neighbor = neighbor
-                print(chosen_neighbor)
                 return chosen_neighbor
 
 m = Metropolis([3, 6, 7, 3, 4], [1, 2, 3, 4, 5])
