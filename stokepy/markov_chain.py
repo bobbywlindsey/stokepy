@@ -48,6 +48,59 @@ class MarkovChain:
         else:
             raise ValueError('Not yet support for {} dimensions'.format(self.dim))
 
+    def gen_from_data(self, corpus, ngram, groupby = 'words'):
+        """
+        parameters:
+            corpus (str) = text to train model
+            ngram (int) = preferred number of chars or words in each state
+            groupby (opt) = 'chars' or 'words'; defaulted to 'words'
+
+        return P (the Markov chain)
+        """
+        # clean text
+        corpus = corpus.lower()
+        exclude = set(string.punctuation)
+        corpus = ''.join(str(ch) for ch in corpus if ch not in exclude)
+
+        if groupby == 'words':
+            corpus = corpus.split(' ')
+        elif groupby == 'chars':
+            # remove carriage returns and spaces
+            corpus = list(corpus)
+            for index, char in enumerate(corpus):
+                if char == '\n':
+                    corpus[index] = ''
+                if char == ' ':
+                    corpus[index] = ''
+            # remove all ''
+            indexes = [i for i, char in enumerate(corpus) if char == '']
+            offset = 0
+            for index in indexes:
+                del corpus[index - offset]
+                offset += 1
+        else:
+            raise ValueError('{} is not supported'.format(groupby))
+
+        # create ngram tuples
+        ngram_tuples = zip(*[corpus[i:] for i in range(ngram)])
+
+        # create frequency matrix
+        ngram_tuples_list = [gram for index, gram in enumerate(ngram_tuples)]
+        ngram_frequencies = [ngram_tuples_list.count(gram)\
+                             for gram in ngram_tuples_list]
+        ngram_beg_freq = {}
+        for ngram in ngram_tuples_list:
+            if ngram_beg_freq.get(ngram[0]):
+                ngram_beg_freq[ngram[0]] += 1
+            else:
+                ngram_beg_freq[ngram[0]] = 1
+
+        ngram_frequencies = dict(zip(ngram_tuples_list, ngram_frequencies))
+        ngram_probabilities = ngram_frequencies.copy()
+        for ngram, frequency in ngram_probabilities.items():
+            ngram_probabilities[ngram] = frequency/ngram_beg_freq.get(ngram[0])
+        return ngram_probabilities
+
     def apply_boundary_condition(self, condition):
         """
         parameters:
