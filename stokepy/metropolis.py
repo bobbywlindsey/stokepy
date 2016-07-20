@@ -1,17 +1,17 @@
-import numpy as np
-import sympy
+from .headers import *
+from .helpers import *
 
 class Metropolis:
 
-    def __init__(self, co_domain, current_state):
-        self.co_domain = co_domain
-        self.current_state = current_state
-        # number of neighbors
-        self.d = sympy.binomial(len(self.co_domain), 2)
-        self.J_unif_prob = 1/self.d
-        pass
+    def __init__(self):
+        self.current_state = None
 
-    def run(self):
+    def run(self, co_domain):
+        self.co_domain = co_domain
+        # number of neighbors
+        self.d = sym.binomial(len(self.co_domain), 2)
+        self.J_unif_prob = 1/self.d
+
         # generate neighbors
         neighbors = self.generate_neighbors()
         # pick neighbor
@@ -19,8 +19,46 @@ class Metropolis:
         print(chosen_neighbor)
 
     def plausibility(self):
-        # TODO: generate Markov chain from data
         pass
+
+    def clean_corpus(self, corpus, remove_chars, groupby = 'words'):
+        # clean corpus
+        corpus = corpus.lower()
+        corpus = ''.join(str(ch) for ch in corpus if ch not in remove_chars)
+
+        if groupby == 'words':
+            corpus = corpus.split(' ')
+        elif groupby == 'chars':
+            corpus = list(corpus)
+        else:
+            raise ValueError('{} is not supported'.format(groupby))
+        return corpus
+
+    def get_corpus_frequencies(self, corpus, ngram):
+        symbols = sorted(list(set(corpus)))
+        print(symbols)
+        corpus_numeric = text_to_numeric(symbols, corpus)
+        print(corpus_numeric[0:500])
+
+        # # create ngram tuples
+        # ngram_tuples = zip(*[corpus[i:] for i in range(ngram)])
+        #
+        # # create frequency matrix
+        # ngram_tuples_list = [gram for index, gram in enumerate(ngram_tuples)]
+        # ngram_frequencies = [ngram_tuples_list.count(gram)\
+        #                      for gram in ngram_tuples_list]
+        # ngram_beg_freq = {}
+        # for ngram in ngram_tuples_list:
+        #     if ngram_beg_freq.get(ngram[0]):
+        #         ngram_beg_freq[ngram[0]] += 1
+        #     else:
+        #         ngram_beg_freq[ngram[0]] = 1
+        #
+        # ngram_frequencies = dict(zip(ngram_tuples_list, ngram_frequencies))
+        # ngram_probabilities = ngram_frequencies.copy()
+        # for ngram, frequency in ngram_probabilities.items():
+        #     ngram_probabilities[ngram] = frequency/ngram_beg_freq.get(ngram[0])
+        # return ngram_probabilities
 
     def generate_neighbors(self):
         neighbors = []
@@ -45,6 +83,3 @@ class Metropolis:
             if random_probability < 0:
                 chosen_neighbor = neighbor
                 return chosen_neighbor
-
-m = Metropolis([3, 6, 7, 3, 4], [1, 2, 3, 4, 5])
-neighbors = m.run()

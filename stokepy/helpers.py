@@ -66,3 +66,10 @@ def plot_absorption_helper(absorption_proportions, tolerance):
     plt.title('Distribution of Absorption Times')
     plt.show()
     return None
+
+def text_to_numeric(symbols, text):
+    return [symbols.index(char.lower()) for char in text]
+
+def numeric_to_text(symbols, numeric):
+    s = [symbols[num] for num in numeric]
+    return ''.join(s)
