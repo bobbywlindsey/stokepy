@@ -20,9 +20,9 @@ class MatrixMultiplicationEvolution:
         """
         self.P                           = markov_chain.P
         self.phi                         = phi
-        self.num_of_steps                = steps
+        self.num_steps                   = steps
         self.memory                      = memory
-        self.num_of_states               = phi.shape[0]
+        self.num_states                  = phi.shape[0]
         self.states_in_recurrent_classes = rec_class_states
         self.tolerance                   = tolerance
 
@@ -35,17 +35,18 @@ class MatrixMultiplicationEvolution:
 
         self.recurrent_class_absorbed_proportions = None
         self.mean_absorption_time = None
-        pass
 
     def plot_absorption(self):
         plot_absorption_helper(self.absorption_proportions, self.tolerance)
+
+        return None
 
     def run(self):
         """ Evolves the system via matrix multiplication """
 
         ### -------------- set stage for simulation -------------- ###
         # create theoretical probability distribution function
-        tpdf    = np.zeros([self.memory, self.num_of_states], dtype = float)
+        tpdf    = np.zeros([self.memory, self.num_states], dtype = float)
         # initialize the tpdf by writing the initial distribution matrix to tpdf
         tpdf[0] = self.phi[:]
         ap = compute_absorbed_proportions(self.phi, \
@@ -54,7 +55,7 @@ class MatrixMultiplicationEvolution:
 
         ### -------------- run the simulation -------------- ###
         step = 0
-        while (step < self.num_of_steps) or (np.sum(ap) < 1 - self.tolerance):
+        while (step < self.num_steps) or (np.sum(ap) < 1 - self.tolerance):
             current_step       = step % self.memory
             next_step          = (step + 1) % self.memory
             tpdf[next_step, :] = tpdf[current_step, :].dot(self.P)

@@ -6,8 +6,8 @@ def architecture_check_passed(P, phi):
     number of states) match the number of elements in the initial distribution,
     phi, which represents the starting point in each state
     """
-    num_of_states = P.shape[0]
-    if phi.shape[0] != num_of_states:
+    num_states = P.shape[0]
+    if phi.shape[0] != num_states:
         #print("Transition matrix and initial distribution dimensions don't match")
         return False
 
@@ -68,8 +68,11 @@ def plot_absorption_helper(absorption_proportions, tolerance):
     return None
 
 def text_to_numeric(symbols, text):
-    return [symbols.index(char.lower()) for char in text]
+    return tuple(symbols.index(char.lower()) for char in text)
 
 def numeric_to_text(symbols, numeric):
     s = [symbols[num] for num in numeric]
     return ''.join(s)
+
+def apply_cipher(cipher, message_numeric):
+    return tuple(cipher[s] for s in message_numeric)

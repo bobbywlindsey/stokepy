@@ -3,28 +3,30 @@ from .helpers import *
 
 class Metropolis:
 
-    def __init__(self):
-        self.current_state = None
+    def __init__(self, num_steps, num_samples, ciphered_text):
+        self.num_steps           = num_steps
+        self.num_samples         = num_samples
+        self.ciphered_text       = ciphered_text
+        self.ciphered_text_len   = len(self.ciphered_text)
 
-    def run(self, co_domain):
-        self.co_domain = co_domain
-        # number of neighbors
-        self.d = sym.binomial(len(self.co_domain), 2)
-        self.J_unif_prob = 1/self.d
+        self.corpus              = None
+        self.unique_symbols      = None
+        self.ciphered_numeric    = None
+        self.num_unique_symbols  = None
+        self.corpus_len          = None
+        self.target_plausibility = None
 
-        # generate neighbors
-        neighbors = self.generate_neighbors()
-        # pick neighbor
-        chosen_neighbor = neighbors[self.pick_neighbor()]
-        print(chosen_neighbor)
+        self.ngram               = None
+        self.M                   = None
 
-    def plausibility(self):
-        pass
+        self.deciphered_text     = None
 
-    def clean_corpus(self, corpus, remove_chars, groupby = 'words'):
+    def clean_corpus(self, corpus, remove_chars, ngram, groupby = 'words'):
+        self.ngram = ngram
         # clean corpus
         corpus = corpus.lower()
         corpus = ''.join(str(ch) for ch in corpus if ch not in remove_chars)
+        corpus_len = len(corpus)
 
         if groupby == 'words':
             corpus = corpus.split(' ')
@@ -32,54 +34,114 @@ class Metropolis:
             corpus = list(corpus)
         else:
             raise ValueError('{} is not supported'.format(groupby))
-        return corpus
 
-    def get_corpus_frequencies(self, corpus, ngram):
-        symbols = sorted(list(set(corpus)))
-        print(symbols)
-        corpus_numeric = text_to_numeric(symbols, corpus)
-        print(corpus_numeric[0:500])
+        # get unique symbols in corpus
+        unique_symbols = sorted(list(set(corpus)))
+        num_unique_symbols = len(unique_symbols)
 
-        # # create ngram tuples
-        # ngram_tuples = zip(*[corpus[i:] for i in range(ngram)])
-        #
-        # # create frequency matrix
-        # ngram_tuples_list = [gram for index, gram in enumerate(ngram_tuples)]
-        # ngram_frequencies = [ngram_tuples_list.count(gram)\
-        #                      for gram in ngram_tuples_list]
-        # ngram_beg_freq = {}
-        # for ngram in ngram_tuples_list:
-        #     if ngram_beg_freq.get(ngram[0]):
-        #         ngram_beg_freq[ngram[0]] += 1
-        #     else:
-        #         ngram_beg_freq[ngram[0]] = 1
-        #
-        # ngram_frequencies = dict(zip(ngram_tuples_list, ngram_frequencies))
-        # ngram_probabilities = ngram_frequencies.copy()
-        # for ngram, frequency in ngram_probabilities.items():
-        #     ngram_probabilities[ngram] = frequency/ngram_beg_freq.get(ngram[0])
-        # return ngram_probabilities
+        self.corpus             = corpus
+        self.unique_symbols     = unique_symbols
+        self.ciphered_numeric   = text_to_numeric(self.unique_symbols,\
+                                                  self.ciphered_text)
+        self.num_unique_symbols = num_unique_symbols
+        self.corpus_len         = corpus_len
 
-    def generate_neighbors(self):
-        neighbors = []
-        for index in range(0, len(self.current_state) - 1):
-            for i in range(index+1, len(self.current_state)):
-                transposition = list(self.current_state)
+        # set corpus frequencies
+        self.set_corpus_frequencies()
 
-                first_number = self.current_state[index]
-                second_number = self.current_state[i]
+        # set target plausibility
+        start = np.random.randint(self.corpus_len - self.ciphered_text_len)
+        target_text = self.corpus[start : start + self.ciphered_text_len]
+        target_numeric = text_to_numeric(self.unique_symbols, target_text)
+        self.target_plausibility = self.log_plausibility(target_numeric)
 
-                transposition[index] = second_number
-                transposition[i] = first_number
+        return None
 
-                neighbors.append(transposition)
-        return neighbors
+    def set_corpus_frequencies(self):
+        corpus_numeric = text_to_numeric(self.unique_symbols, self.corpus)
+        dimensions = np.repeat(self.num_unique_symbols, self.ngram)
+        # initialize M with 1s because log function doesn't like 0s
+        M = np.ones(dimensions, int)
+        # count frequencies
+        for i in range(self.corpus_len - self.ngram + 1):
+            M[corpus_numeric[i:i + self.ngram]] += 1
+        # normalize last dimension
+        M = np.apply_along_axis(normalize_vector, -1, M)
+        # log all frequencies to avoid floating point error
+        M = np.log(M)
+        self.M = M
 
-    def pick_neighbor(self):
-        # get number of possible neighbors
-        random_probability = np.random.rand()
-        for neighbor in range(self.d):
-            random_probability = random_probability - self.J_unif_prob
-            if random_probability < 0:
-                chosen_neighbor = neighbor
-                return chosen_neighbor
+        return None
+
+    def run(self):
+        # randomly choose initial states for each sample
+        deciphers = [np.random.permutation(self.num_unique_symbols) \
+                     for sample in range(self.num_samples)]
+        # calculate plausibility for initial states
+        current_plausibilities = [self.log_plausibility(apply_cipher(decipher,\
+                                  self.ciphered_numeric)) \
+                                  for decipher in deciphers]
+        plausibility_hist = np.zeros([self.num_steps, self.num_samples])
+
+        for step in range(self.num_steps):
+            for sample in range(self.num_samples):
+                evolution_results             = self.evolve(deciphers[sample],\
+                                                current_plausibilities[sample])
+                deciphers[sample]             = evolution_results[0]
+                current_plausibilities[sample]  = evolution_results[1]
+                plausibility_hist[step, sample] = current_plausibilities[sample]
+
+            # get greatest plausibility
+            index = np.argmax(current_plausibilities)
+            max_plausibility = current_plausibilities[index]
+
+            if np.exp(max_plausibility - self.target_plausibility) > 0.999:
+                break
+
+        print("Best sample is number {}\n".format(index))
+        plausibility_hist = plausibility_hist[:step, :]
+
+        self.decipher_text(deciphers[index], self.ciphered_numeric)
+
+        return None
+
+    def log_plausibility(self, message_numeric):
+        plausibility = 0
+        for i in range(self.ciphered_text_len - self.ngram + 1):
+            # sum because we took log of M to avoid roundoff errors
+            plausibility += self.M[message_numeric[i: i + self.ngram]]
+        return plausibility
+
+    def evolve(self, decipher, current_plausibility):
+        # randomly choose neighbor from (num_unique_symbols choose 2) neighbors
+        i, j = np.random.randint(self.num_unique_symbols, size = 2)
+        # make a transposition
+        decipher[i], decipher[j] = decipher[j], decipher[i]
+
+        proposed_deciphered_numeric = apply_cipher(decipher, \
+                                                   self.ciphered_numeric)
+        proposed_plaus = self.log_plausibility(proposed_deciphered_numeric)
+        plausibility_diff = proposed_plaus - current_plausibility
+        if plausibility_diff > 0:
+            # move to neighbor
+            current_plausibility = proposed_plaus
+        else:
+            acceptance_ratio = np.e**plausibility_diff
+            r = np.random.rand()
+            if r <= acceptance_ratio:
+                # move to neighbor
+                current_plausibility = proposed_plaus
+            else:
+                # stay; so we need to unflip transposition
+                decipher[i], decipher[j] = decipher[j], decipher[i]
+
+        return decipher, current_plausibility
+
+    def decipher_text(self, best_cipher, ciphered_numeric):
+        decipher             = np.argsort(best_cipher)
+        deciphered_numeric   = apply_cipher(decipher, ciphered_numeric)
+        deciphered_text      = numeric_to_text(self.unique_symbols, \
+                                               deciphered_numeric)
+        self.deciphered_text = deciphered_text
+
+        return None
