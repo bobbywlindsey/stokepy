@@ -98,7 +98,7 @@ class Metropolis:
             if np.exp(max_plausibility - self.target_plausibility) > 0.999:
                 break
 
-        print("Best sample is number {}\n".format(index))
+        print("Best sample is number {}.\n".format(index))
         plausibility_hist = plausibility_hist[:step, :]
 
         self.decipher_text(deciphers[index], self.ciphered_numeric)
