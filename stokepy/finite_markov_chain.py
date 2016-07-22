@@ -1,30 +1,23 @@
 from .headers import *
 from .helpers import *
 
-class MarkovChain:
-    """
-    parameters:
-        P   = transition matrix
-        phi = initial distribution
-
-    returns a MarkovChain object
-    """
+class FiniteMarkovChain:
 
     def __init__(self):
-        self.P             = None
-        self.p             = None
-        self.q             = None
+        self.P          = None
+        self.p          = None
+        self.q          = None
         self.num_states = None
-        self.dim           = None
-        self.phi           = None
+        self.dim        = None
+        self.phi        = None
 
     def gen_from_params(self, phi, p, num_states, dim):
         """
         parameters:
+            phi (numpy array)   = initial distribution
             p (int)             = probability of moving forward to another state
             num_states (int) = # of states you have
             dim (int)           = dimension of the Markov chain
-            phi (numpy array)   = initial distribution
 
         returns P (the Markov chain)
         """

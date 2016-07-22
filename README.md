@@ -18,7 +18,7 @@ import numpy as np
 Manually:
 ```python
 # create nxn Markov chain
-mc = np.array([[0, .5, 0, .5, 0, 0, 0, 0, 0], \
+fmc = np.array([[0, .5, 0, .5, 0, 0, 0, 0, 0], \
               [1/3, 0, 1/3, 0, 1/3, 0, 0, 0, 0], \
               [0, .5, 0, 0, 0, .5, 0, 0, 0], \
               [1/3, 0, 0, 0, 1/3, 0, 1/3, 0, 0], \
@@ -34,17 +34,17 @@ phi = np.array([0, 0, 0, 0, 0, 1, 0, 0, 0])
 By Parameters:
 ```python
 # instantiate class
-mc = sp.MarkovChain()
+fmc = sp.FiniteMarkovChain()
 
 # create initial distribution vector
 phi = np.array([0, 0, 1, 0, 0])
 
 # generate Markov chain with no boundary conditions
-mc.gen_from_params(phi, p = 0.6, num_of_states = 5, dim = 2)
+fmc.gen_from_params(phi, p = 0.6, num_of_states = 5, dim = 2)
 
 # apply boundary condition: absorbing, reflecting, semi-reflecting
 # only works for 1 dimension Markov chains at the moment
-mc.apply_boundary_condition(condition='semi-reflecting')
+fmc.apply_boundary_condition(condition='semi-reflecting')
 ```
 
 ### Ways to Run the Markov chain
@@ -53,7 +53,7 @@ Evolution via Samples
 ```python
 
 # choose solution method like Sample Evolution
-sample_evolution = sp.SampleEvolution(mc, phi, samples = 2000, steps = 2000,\
+sample_evolution = sp.SampleEvolution(fmc, phi, samples = 2000, steps = 2000,\
                                       rec_class_states)
 
 # run the solution
@@ -73,7 +73,7 @@ Evolution via Matrix Multiplication
 ```python
 
 # choose solution method like Matrix Multiplication Evolution
-matrx_mult_evo = sp.MatrixMultiplicationEvolution(mc, phi, steps = 2000,\
+matrx_mult_evo = sp.MatrixMultiplicationEvolution(fmc, phi, steps = 2000,\
                                       rec_class_states = [])
 # run the solution
 matrx_mult_evo.run()
@@ -85,6 +85,22 @@ absorption_proportions = matrx_mult_evo.absorption_proportions
 apbrc                  = matrx_mult_evo.recurrent_class_absorbed_proportions
 mean_absorption_time   = matrx_mult_evo.mean_absorption_time
 
-# plot absorption tiems for recurrent classes
+# plot absorption times for recurrent classes
 matrx_mult_evo.plot_absorption()
+```
+
+### Galton's Branching Process Markov chain
+```python
+q                 = .9
+samples           = 1000
+# array of prob of producing 0 individuals, 1 individual, 2 individuals, etc...
+probs        = [1-q, q/2, q/2]
+colony_size_limit = 1000
+
+bp = sp.BranchingProcess(samples, probs, colony_size_limit)
+bp.run()
+
+# print results
+print('{} percent of colonies survived'.format(bp.percent_colonies_survived))
+print('{} percent of colonies died'.format(bp.percent_colonies_died))
 ```
