@@ -87,7 +87,7 @@ class Metropolis:
             for sample in range(self.num_samples):
                 evolution_results             = self.evolve(deciphers[sample],\
                                                 current_plausibilities[sample])
-                deciphers[sample]             = evolution_results[0]
+                deciphers[sample]               = evolution_results[0]
                 current_plausibilities[sample]  = evolution_results[1]
                 plausibility_hist[step, sample] = current_plausibilities[sample]
 
@@ -138,8 +138,7 @@ class Metropolis:
         return decipher, current_plausibility
 
     def decipher_text(self, best_cipher, ciphered_numeric):
-        decipher             = np.argsort(best_cipher)
-        deciphered_numeric   = apply_cipher(decipher, ciphered_numeric)
+        deciphered_numeric   = apply_cipher(best_cipher, ciphered_numeric)
         deciphered_text      = numeric_to_text(self.unique_symbols, \
                                                deciphered_numeric)
         self.deciphered_text = deciphered_text
