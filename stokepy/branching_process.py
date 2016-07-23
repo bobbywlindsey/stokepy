@@ -2,6 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class BranchingProcess:
+    """
+    parameters:
+        samples (int) = number of samples
+        probs (array) = P(1 individual), P(2 individuals), etc... all sum to 1
+        colony_size_limit (int) = stopping point for colony growth
+
+    attributes:
+        percent_colonies_survived
+        percent_colonies_died
+    """
 
     def __init__(self, samples, probs, colony_size_limit):
         self.samples                   = samples
@@ -50,7 +60,6 @@ class BranchingProcess:
                 if X <= 0:
                     samples_died += 1
                     break
-
 
             if X > 0:
                 samples_survived += 1

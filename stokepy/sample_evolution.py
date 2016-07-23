@@ -1,4 +1,4 @@
-from .headers import *
+import numpy as np
 from .helpers import *
 
 class SampleEvolution:
@@ -129,5 +129,5 @@ class SampleEvolution:
                             self.absorption_proportions, self.tolerance)
         times = np.arange(absorbed_marginal.shape[0])
         self.mean_absorption_time = absorbed_marginal.dot(times)
-        
+
         return None

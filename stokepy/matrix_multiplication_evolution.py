@@ -1,7 +1,16 @@
-from .headers import *
+import numpy as np
 from .helpers import *
 
 class MatrixMultiplicationEvolution:
+    """
+    parameters:
+        markov_chain (numpy matrix)
+        phi (numpy vector)                 = initial distribution
+        steps (int)                        = number of steps to take
+        rec_class_states (array of arrays) = recurrent classes
+        memory (int)                       = how many steps to keep of the run
+        tolerance (float)
+    """
 
     def __init__(self, markov_chain, phi, steps, rec_class_states, memory = 10,\
                  tolerance = 0.001):
@@ -18,6 +27,7 @@ class MatrixMultiplicationEvolution:
 
         returns MatrixMultiplicationEvolution object with metadata
         """
+
         self.P                           = markov_chain.P
         self.phi                         = phi
         self.num_steps                   = steps

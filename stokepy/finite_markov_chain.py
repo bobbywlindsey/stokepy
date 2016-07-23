@@ -1,4 +1,4 @@
-from .headers import *
+import numpy as np
 from .helpers import *
 
 class FiniteMarkovChain:

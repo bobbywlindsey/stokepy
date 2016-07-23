@@ -2,6 +2,12 @@ from .helpers import *
 import numpy as np
 
 class Metropolis:
+    """
+    parameters:
+        num_steps (int) = number of steps to take
+        num_samples (int) = number of samples
+        ciphered_text (str) = ciphered text you want to decipher
+    """
 
     def __init__(self, num_steps, num_samples, ciphered_text):
         self.num_steps           = num_steps
@@ -21,6 +27,11 @@ class Metropolis:
 
     def set_target_plausibility(self, corpus, corpus_len, unique_symbols, \
                                 ngram, M):
+        """
+        parameters:
+            all are taken from the TextStats class
+        """
+
         self.unique_symbols     = unique_symbols
         self.num_unique_symbols = len(self.unique_symbols)
         self.ngram              = ngram
