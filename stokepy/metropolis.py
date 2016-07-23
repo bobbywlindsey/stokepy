@@ -1,5 +1,5 @@
-from .headers import *
 from .helpers import *
+import numpy as np
 
 class Metropolis:
 
@@ -9,11 +9,9 @@ class Metropolis:
         self.ciphered_text       = ciphered_text
         self.ciphered_text_len   = len(self.ciphered_text)
 
-        self.corpus              = None
         self.unique_symbols      = None
         self.ciphered_numeric    = None
         self.num_unique_symbols  = None
-        self.corpus_len          = None
         self.target_plausibility = None
 
         self.ngram               = None
@@ -21,59 +19,23 @@ class Metropolis:
 
         self.deciphered_text     = None
 
-    def clean_corpus(self, corpus, remove_chars, ngram, groupby = 'words'):
-        self.ngram = ngram
-        # clean corpus
-        corpus = corpus.lower()
-        corpus = ''.join(str(ch) for ch in corpus if ch not in remove_chars)
-        corpus_len = len(corpus)
-
-        if groupby == 'words':
-            corpus = corpus.split(' ')
-        elif groupby == 'chars':
-            corpus = list(corpus)
-        else:
-            raise ValueError('{} is not supported'.format(groupby))
-
-        # get unique symbols in corpus
-        unique_symbols = sorted(list(set(corpus)))
-        num_unique_symbols = len(unique_symbols)
-
-        self.corpus             = corpus
+    def set_target_plausibility(self, corpus, corpus_len, unique_symbols, \
+                                ngram, M):
         self.unique_symbols     = unique_symbols
-        self.ciphered_numeric   = text_to_numeric(self.unique_symbols,\
-                                                  self.ciphered_text)
-        self.num_unique_symbols = num_unique_symbols
-        self.corpus_len         = corpus_len
-
-        # set corpus frequencies
-        self.set_corpus_frequencies()
-
+        self.num_unique_symbols = len(self.unique_symbols)
+        self.ngram              = ngram
+        self.M                  = M
         # set target plausibility
-        start = np.random.randint(self.corpus_len - self.ciphered_text_len)
-        target_text = self.corpus[start : start + self.ciphered_text_len]
+        start = np.random.randint(corpus_len - self.ciphered_text_len)
+        target_text = corpus[start : start + self.ciphered_text_len]
         target_numeric = text_to_numeric(self.unique_symbols, target_text)
         self.target_plausibility = self.log_plausibility(target_numeric)
 
         return None
 
-    def set_corpus_frequencies(self):
-        corpus_numeric = text_to_numeric(self.unique_symbols, self.corpus)
-        dimensions = np.repeat(self.num_unique_symbols, self.ngram)
-        # initialize M with 1s because log function doesn't like 0s
-        M = np.ones(dimensions, int)
-        # count frequencies
-        for i in range(self.corpus_len - self.ngram + 1):
-            M[corpus_numeric[i:i + self.ngram]] += 1
-        # normalize last dimension
-        M = np.apply_along_axis(normalize_vector, -1, M)
-        # log all frequencies to avoid floating point error
-        M = np.log(M)
-        self.M = M
-
-        return None
-
     def run(self):
+        self.ciphered_numeric = text_to_numeric(self.unique_symbols,\
+                                                self.ciphered_text)
         # randomly choose initial states for each sample
         deciphers = [np.random.permutation(self.num_unique_symbols) \
                      for sample in range(self.num_samples)]
