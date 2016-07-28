@@ -1,5 +1,4 @@
 from .helpers import *
-import numpy as np
 
 class Metropolis:
     """
