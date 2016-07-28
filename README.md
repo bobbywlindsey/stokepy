@@ -5,7 +5,7 @@ mathematical theory.
 
 ## Install
 ```
-$ pip install [something here]
+$ pip install git+https://github.com/bobbywlindsey/stokepy
 ```
 
 ## Usage
