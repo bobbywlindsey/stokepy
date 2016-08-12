@@ -3,7 +3,7 @@ import stokepy as sp
 q                 = .9
 samples           = 1000
 # array of prob of producing 0 individuals, 1 individual, 2 individuals, etc...
-probs        = [1-q, q/2, q/2]
+probs             = [1-q, q/2, q/2]
 colony_size_limit = 1000
 
 bp = sp.BranchingProcess(samples, probs, colony_size_limit)
